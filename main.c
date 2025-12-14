@@ -5,8 +5,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+typedef long long num;
+
 struct Factor {
-  int prime;
+  num prime;
   int power;
 };
 
@@ -24,7 +26,7 @@ int add_to_result(struct Factor **pResult,
     const struct Factor factor);
 
 int main(int argc, char **argv) {
-  int number;
+  num number;
 
   if (argc <= 1) {
     printf("Needs an argument\n");
@@ -33,7 +35,7 @@ int main(int argc, char **argv) {
   }
   {
     char *endptr;
-    number = (int) strtol(argv[1], &endptr, 10);  // Base = 10.
+    number = (num) strtoll(argv[1], &endptr, 10);  // Base = 10.
     if (*endptr != '\0') {
       printf("The argument is not a number!\n");
       return -1;  // Argument is not a number.
@@ -56,10 +58,22 @@ int main(int argc, char **argv) {
 
   const int kProgressMaxLength = 30;
   int progress_length;
-  int original_number = number;  // Backup the number because the code
+  num original_number = number;  // Backup the number because the code
                                  // below will modify it.
-  // Find prime numbers and check if the number is one of "number"'s factor.
-  for (int i = 2; i <= number; i++) {
+  
+  // Handle factor 2.
+  int power_count = 0;
+  while (number % 2 == 0) {
+    number /= 2;
+    power_count++;
+  }
+  if (power_count > 0) {
+    struct Factor factor = {2, power_count};
+    add_to_result(&pResult, &result_size, &result_length, factor);
+  }
+
+  // Check if the number is one of "number"'s factor.
+  for (num i = 3; i * i <= number; i += 2) {
 
     if (number == 1) {
       // Exit this for loop.
@@ -67,7 +81,7 @@ int main(int argc, char **argv) {
     }
 
     // "i" is a prime number.
-    int power_count = 0;
+    power_count = 0;
     while (number % i == 0) {
       number /= i;
       power_count++;
@@ -99,6 +113,12 @@ int main(int argc, char **argv) {
     fflush(stdout);
   }
 
+  // If number is still greater than 2, then it is a prime factor.
+  if (number > 2) {
+    struct Factor factor = {number, 1};
+    add_to_result(&pResult, &result_size, &result_length, factor);
+  }
+
   // Print a finish progress bar.
   printf("\r|->");
   for (int i = 0; i < kProgressMaxLength; i++) {
@@ -110,7 +130,7 @@ int main(int argc, char **argv) {
 
   // Print the result.
   for (int i = 0; i < result_length; i++) {
-    printf("%d^%d * ", pResult[i].prime, pResult[i].power);
+    printf("%lld^%d * ", pResult[i].prime, pResult[i].power);
   }
   printf("\b\b\b   \n");
 
