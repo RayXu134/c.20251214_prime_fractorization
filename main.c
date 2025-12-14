@@ -54,8 +54,13 @@ int main(int argc, char **argv) {
     return -1;  // Can't malloc.
   }
 
+  const int kProgressMaxLength = 30;
+  int progress_length;
+  int original_number = number;  // Backup the number because the code
+                                 // below will modify it.
   // Find prime numbers and check if the number is one of "number"'s factor.
   for (int i = 2; i <= number; i++) {
+
     if (number == 1) {
       // Exit this for loop.
       break;
@@ -80,7 +85,28 @@ int main(int argc, char **argv) {
       perror("add to result");
       return -1;
     }
+
+    // Update the progress bar.
+    printf("\r|->");  // Start of progress bar.
+    progress_length = (int) (((double) (original_number - number)) / original_number * kProgressMaxLength);
+    for (int j = 0; j < progress_length; j++) {
+      printf("#");
+    }
+    for (int j = 0; j < kProgressMaxLength-progress_length; j++) {
+      printf(" ");
+    }
+    printf("<-|");  // End of progress bar.
+    fflush(stdout);
   }
+
+  // Print a finish progress bar.
+  printf("\r|->");
+  for (int i = 0; i < kProgressMaxLength; i++) {
+    printf("#");
+  }
+  printf("<-|");
+
+  printf("\n");  // Go out of progress bar.
 
   // Print the result.
   for (int i = 0; i < result_length; i++) {
