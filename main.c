@@ -1,4 +1,5 @@
 // main.c
+// Copyright (c) 2025 Ray. All Rights Reserved.
 // 耀鈞說做這個可以讓電腦壞掉數分鐘，請勿模仿
 
 #include <stdio.h>
