@@ -33,7 +33,8 @@ int add_to_result(struct Factor *pResult,
     int *current_length,
     const struct Factor factor);
 
-struct Factor *factorize(struct Factor *pResult);
+// @brief Factorize the number and store it to pResult.
+struct Factor *factorize(struct Factor *pResult, num number);
 
 // ----------
 // MAIN
@@ -86,7 +87,7 @@ int main(int argc, char **argv) {
     add_to_result(pResult, &result_size, &result_length, factor);
   }
 
-  // Check if the number is one of "number"'s factor.
+  // Handle factors after 2.
   for (num i = 3; i * i <= number; i += 2) {
 
     if (number == 1) {
@@ -94,14 +95,13 @@ int main(int argc, char **argv) {
       break;
     }
 
-    // "i" is a prime number.
     power_count = 0;
     while (number % i == 0) {
       number /= i;
       power_count++;
     }
     if (power_count == 0) {
-      continue;
+      continue;  // Check next number (i).
     }
 
     // Initialize a struct Factor and add it to result.
@@ -190,4 +190,8 @@ int add_to_result(struct Factor *pResult,
   pResult[*current_length] = factor;
   (*current_length)++;  // Increase the result_size of pResult.
   return 0;
+}
+
+struct Factor *factorize(struct Factor *pResult, num number) {
+
 }
