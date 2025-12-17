@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
   }
   if (power_count > 0) {
     struct Factor factor = {2, power_count};
-    add_to_result(&pResult, &result_size, &result_length, factor);
+    add_to_result(pResult, &result_size, &result_length, factor);
   }
 
   // Check if the number is one of "number"'s factor.
@@ -109,7 +109,7 @@ int main(int argc, char **argv) {
     factor.prime = i;
     factor.power = power_count;
     // Add it to result.
-    if (add_to_result(&pResult, &result_size, &result_length, factor) == -1) {
+    if (add_to_result(pResult, &result_size, &result_length, factor) == -1) {
       perror("add to result");
       return -1;
     }
@@ -130,7 +130,7 @@ int main(int argc, char **argv) {
   // If number is still greater than 2, then it is a prime factor.
   if (number > 2) {
     struct Factor factor = {number, 1};
-    add_to_result(&pResult, &result_size, &result_length, factor);
+    add_to_result(pResult, &result_size, &result_length, factor);
   }
 
   // Print a finish progress bar.
@@ -157,21 +157,22 @@ int main(int argc, char **argv) {
 // FUNCTION IMPLEMENTATIONS
 // ------------------------
 
-struct Factor *realloc_result(struct Factor **pResult, int *current_size) {
-  if (*pResult == NULL) {
+struct Factor *realloc_result(struct Factor *pResult, int *current_size) {
+  if (pResult == NULL) {
     return NULL;  // pResult isn't available.
   }
   *current_size *= 2;  // Double the result_size.
-  struct Factor *new_pResult = realloc(*pResult, *current_size * sizeof(struct Factor));
+  // Reallocated result, bigger and can store more results.
+  struct Factor *new_pResult = realloc(pResult, *current_size * sizeof(struct Factor));
   if (new_pResult == NULL) {
-    free(*pResult);
+    free(pResult);
     return NULL;
   }
-  *pResult = new_pResult;
-  return *pResult;
+  *pResult = *new_pResult;
+  return pResult;
 }
 
-int add_to_result(struct Factor **pResult,
+int add_to_result(struct Factor *pResult,
     int *current_size,
     int *current_length,
     const struct Factor factor) {
@@ -186,7 +187,7 @@ int add_to_result(struct Factor **pResult,
     }
   }
   // Append factor to the end of pResult.
-  (*pResult)[*current_length] = factor;
+  pResult[*current_length] = factor;
   (*current_length)++;  // Increase the result_size of pResult.
   return 0;
 }
