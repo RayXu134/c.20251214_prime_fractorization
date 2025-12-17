@@ -12,18 +12,32 @@ struct Factor {
   int power;
 };
 
+// ----------------
+// GLOBAL VARIABLES
+// ----------------
+
 int result_size;     // Start size of pResult is 2, assign later.
 int result_length;   // Length of pResult.
 struct Factor *pResult;  // Result.
 
-struct Factor *realloc_result(struct Factor **pResult, int *current_size);
+// ----------------------
+// FUNCTIONS DECLARATIONS
+// ----------------------
+
+struct Factor *realloc_result(struct Factor *pResult, int *current_size);
 
 // @brief Add a factor to result.
 // This will increase current_length by 1 if success.
-int add_to_result(struct Factor **pResult,
+int add_to_result(struct Factor *pResult,
     int *current_size,
     int *current_length,
     const struct Factor factor);
+
+struct Factor *factorize(struct Factor *pResult);
+
+// ----------
+// MAIN
+// ----------
 
 int main(int argc, char **argv) {
   num number;
@@ -138,6 +152,10 @@ int main(int argc, char **argv) {
 
   return 0;
 }
+
+// ------------------------
+// FUNCTION IMPLEMENTATIONS
+// ------------------------
 
 struct Factor *realloc_result(struct Factor **pResult, int *current_size) {
   if (*pResult == NULL) {
