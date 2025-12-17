@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
+#include <unistd.h>  // write().
 
 typedef long long num;
 
@@ -43,44 +45,72 @@ int factorize(
 
 int main(int argc, char **argv) {
   num number;
+  // The '\0' character is included.
+  const int kMaxSizeOfNumberInString = 10 + 1;
+  char *number_in_string = (char *) malloc(kMaxSizeOfNumberInString);
 
-  if (argc <= 1) {
-    printf("Needs an argument\n");
-    printf("Try: %s 210\n", argv[0]);
-    return -1;  // User didn't give any argument.
-  }
-  {
+  /*
+  // The user gave us arguments.
+  if (argc > 1) {
+    number_in_string = argv[1];
+    // Attempt to convert the argument to a number.
     char *endptr;
-    number = (num) strtoll(argv[1], &endptr, 10);  // Base = 10.
+    number = (num) strtoll(number_in_string, &endptr, 10);  // Base = 10.
     if (*endptr != '\0') {
+      // Argument is not a number.
       printf("The argument is not a number!\n");
-      return -1;  // Argument is not a number.
     }
   }
-
-  // If number is less than 0.
-  if (number <= 0) {
-    printf("Error. number <= 0\n");
-    return -1;
-  }
-
+  */
 
   const int kProgressMaxLength = 30;
   struct Factor *pResult = NULL;
   int result_length;
-  int status = factorize(&pResult, &result_length, number, kProgressMaxLength);
-  if (status == -1) {
-    printf("Got an error in factorize function\n");
-    return -1;
-  }
 
-  // Print the result.
-  for (int i = 0; i < result_length; i++) {
-    printf("%lld^%d * ", pResult[i].prime, pResult[i].power);
-  }
-  printf("\b\b\b   \n");
+  // Main loop.
+  while (true) {
 
-  free(pResult);
+    // Read user input.
+    printf("\n");
+    printf("Enter a positive integer with fewer than 30 digits (30位以下的正整數): ");
+    fgets(number_in_string, sizeof(char) * kMaxSizeOfNumberInString, stdin);
+
+    // Delete the '\n' character at the end of the string.
+    number_in_string[strcspn(number_in_string, "\n")] = '\0';
+    {
+      // Attempt to convert number_in_string to number in the num type.
+      char *endptr;
+      number = (num) strtoll(number_in_string, &endptr, 10);  // Base = 10.
+      if (*endptr != '\0') {
+        // The string that user entered can't convert to a number.
+        printf("Can't convert \"%s\" to a number!\n", number_in_string);
+        continue;
+      }
+    }
+ 
+    if (number <= 0) {
+      // Number is less than 0.
+      printf("Error. number <= 0\n");
+      continue;
+    }
+
+    int status = factorize(&pResult, &result_length, number, kProgressMaxLength);
+    if (status == -1) {
+      // Got an error in factorize function, exit.
+      printf("Got an error in factorize function\n");
+      return -1;
+    }
+
+    // Print the result.
+    printf("%lld = ", number);
+    for (int i = 0; i < result_length; i++) {
+      printf("%lld^%d * ", pResult[i].prime, pResult[i].power);
+    }
+    printf("\b\b\b   \n");
+
+    free(pResult);
+
+  }
 
   return 0;
 }
@@ -145,7 +175,7 @@ int factorize(
   }
 
   // Backup the number because the code below will modify it.
-  const int original_number = number;
+  const num original_number = number;
 
   if (number == 1) {
     struct Factor factor = {1, 1};
@@ -191,16 +221,15 @@ int factorize(
     }
 
     // Update the progress bar.
-    printf("\r|->");  // Start of progress bar.
+    write(STDOUT_FILENO, "\r|->", 5);  // Start of progress bar.
     const int progress_length = (int) (((double) (original_number - number)) / original_number * kProgressMaxLength);
     for (int j = 0; j < progress_length; j++) {
-      printf("#");
+      write(STDOUT_FILENO, "#", 2);
     }
     for (int j = 0; j < kProgressMaxLength-progress_length; j++) {
-      printf(" ");
+      write(STDOUT_FILENO, " ", 2);
     }
-    printf("<-|");  // End of progress bar.
-    fflush(stdout);
+    write(STDOUT_FILENO, "<-|", 4);  // End of progress bar.
   }
 
   // If number is still greater than 2, then it is a prime factor.
