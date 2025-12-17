@@ -203,7 +203,12 @@ int factorize(
 
   // If number is still greater than 2, then it is a prime factor.
   // The number is a prime number.
+  // Because of the for loop above.
+  // for (...; i < number; ...).
+  // i is always less than number. So if the number's prime factor is itself,
+  // The loop will not process that number, so we need the code below.
   if (number > 2) {
+    // The number's prime factor is itself.
     struct Factor factor = {number, 1};
     add_to_result(pResult, &result_size, result_length, factor);
   }
